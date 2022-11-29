@@ -84,10 +84,10 @@ void RunScheduler(void) {
     timer_create(CLOCK_REALTIME, NULL, &timer_id);
     signal(SIGINT, remove_sem);
 
-    value.it_interval.tv_sec = TIMESLICE;
-    value.it_interval.tv_nsec = 0;
-    value.it_value.tv_sec = TIMESLICE;
-    value.it_value.tv_nsec = 0;
+    value.it_interval.tv_sec = 1;
+    value.it_interval.tv_nsec = 999 * 1000 * 1000;
+    value.it_value.tv_sec = 1;
+    value.it_value.tv_nsec = 999 * 1000 * 1000;
 
     if (pCurrentThread == NULL && ReadyQueue.queueCount != 0) {
         sem_wait(SEM);
