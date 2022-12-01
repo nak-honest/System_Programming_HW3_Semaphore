@@ -7,4 +7,6 @@
 
 extern sem_t *SEM;
 
+void sync_time_delay(void);
+
 #endif // __SYNC_H__
