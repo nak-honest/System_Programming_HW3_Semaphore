@@ -1,6 +1,7 @@
 #include "queue.h"
 #include "stdio.h"
 
+/* Queue의 tail에 스레드 추가 */
 void queue_push(ThreadQueue *q, Thread *t) {
     if (q->queueCount == 0) {
         t->pNext = NULL;
@@ -16,6 +17,7 @@ void queue_push(ThreadQueue *q, Thread *t) {
     q->queueCount++;
 }
 
+/* Queue의 head의 스레드 삭제 */
 void queue_pop(ThreadQueue *q) {
     if (q->queueCount == 0) {
         perror("queue_pop() : queue is empty, underflow!");
@@ -32,6 +34,7 @@ void queue_pop(ThreadQueue *q) {
     q->queueCount--;
 }
 
+/* Queue에서 스레드를 찾아서 삭제 */
 void queue_remove(ThreadQueue *q, Thread *t) {
     Thread *cusor;
     for (cusor = q->pHead; cusor != NULL; cusor = cusor->pNext) {

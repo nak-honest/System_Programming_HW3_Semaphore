@@ -16,15 +16,15 @@ ThreadTblEnt pThreadTbEnt[MAX_THREAD_NUM];
 Thread *pCurrentThread; // Runnig 상태의 Thread를 가리키는 변수
 
 void Init(void) {
-	/* 세마포어가 열려있다면 닫은 후 삭제 */
+    /* 세마포어가 열려있다면 닫은 후 삭제 */
     sem_close(SEM);
     sem_unlink("mysem");
-    
+
     /* ReadyQueue 초기화 */
     ReadyQueue.queueCount = 0;
     ReadyQueue.pHead = NULL;
     ReadyQueue.pTail = NULL;
-    
+
     /* WaitingQueue 초기화 */
     WaitingQueue.queueCount = 0;
     WaitingQueue.pHead = NULL;
@@ -54,7 +54,7 @@ int thread_create(thread_t *thread, thread_attr_t *attr,
     for (int i = 0; i < MAX_THREAD_NUM; i++) {
         if (pThreadTbEnt[i].bUsed == 0) {
             is_full = 0;
-            tid = i; // 해당 엔트리의 번호가 thread의 id임
+            tid = i;       // 해당 엔트리의 번호가 thread의 id임
             *thread = tid; // 생성된 thread id 반환
             break;
         }
@@ -227,7 +227,8 @@ int thread_join(thread_t tid) {
     parent_thread = pCurrentThread; // 현재 이 함수를 호출한 스레드가 부모임
     child_thread = pThreadTbEnt[tid].pThread; // tid에 해당하는 스레드가 자식임
 
-    signal(SIGCHLD, disjoin); // SIGCHLD에 대한 핸들러 등록. 이제 SIGCHLD를 ignore 하지 않는다.
+    signal(SIGCHLD, disjoin); // SIGCHLD에 대한 핸들러 등록. 이제 SIGCHLD를
+                              // ignore 하지 않는다.
 
     /* parent를 WaitingQueue로 이동시킨다 */
     pCurrentThread->status = THREAD_STATUS_WAIT;
@@ -235,8 +236,8 @@ int thread_join(thread_t tid) {
 
     /* Context Switch */
     if (ReadyQueue.queueCount != 0) {
-    	/* ReadyQueue가 비어있지 않은 경우에만 새로운 스레드를 실행할 수 있다 */
-	new_thread = ReadyQueue.pHead;
+        /* ReadyQueue가 비어있지 않은 경우에만 새로운 스레드를 실행할 수 있다 */
+        new_thread = ReadyQueue.pHead;
         queue_pop(&ReadyQueue); // ReadyQueue에서 새로운 스레드를 꺼낸다
 
         new_thread->status = THREAD_STATUS_RUN;
@@ -244,16 +245,18 @@ int thread_join(thread_t tid) {
 
         newpid = new_thread->pid;
         kill(newpid, SIGCONT); // 새로운 스레드를 실행시킨다
-        pCurrentThread = new_thread; // pCurrentThread가 새로운 스레드를 가리키게 한다
+        pCurrentThread =
+            new_thread; // pCurrentThread가 새로운 스레드를 가리키게 한다
     } else {
-	/* ReadyQueue가 비어있는 경우 아무것도 실행하지 않는다 */
+        /* ReadyQueue가 비어있는 경우 아무것도 실행하지 않는다 */
         pCurrentThread = NULL;
     }
 
     sem_post(SEM); // 부모가 pause() 상태에 들어가기 때문에 동기화 해제
 
     while (child_thread->status != THREAD_STATUS_ZOMBIE) {
-        pause(); // SIGCHLD를 받아서 자식이 좀비인것을 확인하면 while문을 빠져나온다
+        pause(); // SIGCHLD를 받아서 자식이 좀비인것을 확인하면 while문을
+                 // 빠져나온다
     }
 
     sem_wait(SEM); // 부모가 다시 깨어나면 동기화를 건다
@@ -262,7 +265,7 @@ int thread_join(thread_t tid) {
     queue_remove(&WaitingQueue, parent_thread);
     queue_push(&ReadyQueue, parent_thread);
     parent_thread->status = THREAD_STATUS_READY;
-	
+
     /* 죽은 자식을 청소한다 */
     free(child_thread->stackAddr);
     child_thread->stackAddr = NULL;
@@ -273,7 +276,8 @@ int thread_join(thread_t tid) {
     pThreadTbEnt[tid].pThread = NULL;
 
     sem_post(SEM);
-    /* 부모는 ReadyQueue의 tail로 들어가기 때문에 위의 코드를 모두 수행 후 정지된다 */
+    /* 부모는 ReadyQueue의 tail로 들어가기 때문에 위의 코드를 모두 수행 후
+     * 정지된다 */
     kill(parent_thread->pid, SIGSTOP);
     return 0;
 }
