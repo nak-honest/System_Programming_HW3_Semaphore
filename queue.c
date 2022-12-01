@@ -29,6 +29,7 @@ void queue_pop(ThreadQueue *q) {
         Thread *remove_thread;
         remove_thread = q->pHead;
         q->pHead = remove_thread->pNext;
+        q->pHead->pPrev = NULL;
         remove_thread->pNext = NULL;
     }
     q->queueCount--;
@@ -59,6 +60,7 @@ void queue_remove(ThreadQueue *q, Thread *t) {
         } else if (q->pTail == t) {
             q->pTail = t->pPrev;
             t->pPrev = NULL;
+            q->pTail->pNext = NULL;
             q->queueCount--;
         } else {
             t->pPrev->pNext = t->pNext;
