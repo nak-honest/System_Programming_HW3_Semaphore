@@ -2,10 +2,12 @@
 #include "init.h"
 #include "queue.h"
 #include "scheduler.h"
+#include "semaphore.h"
 #include "sync.h"
 #include <linux/sched.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define STACK_SIZE 1024 * 64
@@ -36,6 +38,13 @@ void Init(void) {
     for (int i = 0; i < MAX_THREAD_NUM; i++) {
         pThreadTbEnt[i].bUsed = 0;
         pThreadTbEnt[i].pThread = NULL;
+    }
+
+    /* pSemaphoreTbiEnt 멤버 초기화 */
+    for (int i = 0; i < MAX_SEMAPHORE_NUM; i++) {
+        memset(pSemaphoreTblEnt[i].name, '\0', SEM_NAME_MAX);
+        pSemaphoreTblEnt[i].bUsed = 0;
+        pSemaphoreTblEnt[i].pSemaphore = NULL;
     }
 }
 

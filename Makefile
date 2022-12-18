@@ -1,5 +1,5 @@
 TARGET=hw2
-OBJ=queue.o scheduler.o thread.o testcase.o TestCase1.o TestCase2.o TestCase3.o
+OBJ=queue.o scheduler.o thread.o semaphore.o
 CC=gcc
 CFLAGS=-c
 
