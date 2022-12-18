@@ -63,7 +63,9 @@ void scheduler(int signo, siginfo_t *info, void *context) {
 
         /* 현재 실행중인 스레드를 빨리 종료시키기 위해 __ContextSwitch부터 호출
          */
-        __ContextSwitch(pCurrentThread->pid, ReadyQueue.pHead->pid);
+        // __ContextSwitch(pCurrentThread->pid, ReadyQueue.pHead->pid);
+        kill(pCurrentThread->pid, SIGSTOP);
+        sync_time_delay();
 
         /* ReadyQueue에서 새로운 스레드를 꺼낸다 */
         new_thread = ReadyQueue.pHead;
@@ -84,6 +86,7 @@ void scheduler(int signo, siginfo_t *info, void *context) {
             queue_push(&ReadyQueue, cur_thread);
             cur_thread->status = THREAD_STATUS_READY;
         }
+        kill(new_thread->pid, SIGCONT);
 
     } else {
         /* ReadyQueue가 비어있지 않지만 현재 실행중인 스레드가 없는 경우 단순히

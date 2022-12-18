@@ -57,26 +57,47 @@ int thread_sem_open(char *name, int count) {
 
 int thread_sem_wait(int semid) {
     Thread *cur_thread = pCurrentThread;
+    Thread *new_thread = NULL;
     Semaphore *sem;
     pid_t cur_pid = cur_thread->pid;
-
-    if (pSemaphoreTblEnt[semid].bUsed == 0) {
-        perror("thread_sem_wait() : That semid is not exist!");
-        return -1;
-    }
+    pid_t new_pid;
 
     sem = pSemaphoreTblEnt[semid].pSemaphore;
 
     if (sem->count > 0) {
         sem->count--;
         return 0;
-    } else {
-        pCurrentThread = NULL;
-        cur_thread->status = THREAD_STATUS_WAIT;
-        queue_push(&sem->waitingQueue, cur_thread);
     }
 
-    kill(cur_pid, SIGSTOP);
+    while (sem->count == 0) {
+        if (ReadyQueue.queueCount != 0) {
+            /* ReadyQueue가 비어있지 않은 경우에만 새로운 스레드를 실행할 수
+             * 있다 */
+            new_thread = ReadyQueue.pHead;
+            queue_pop(&ReadyQueue); // ReadyQueue에서 새로운 스레드를 꺼낸다
+            pCurrentThread = new_thread;
+
+            new_thread->status = THREAD_STATUS_RUN;
+            new_thread->cpu_time += 2; // 새로운 스레드의 상태 업데이트
+
+            new_pid = new_thread->pid;
+
+            // pCurrentThread가 새로운 스레드를 가리키게 한다
+            cur_thread->status = THREAD_STATUS_WAIT;
+            queue_push(&sem->waitingQueue, cur_thread);
+        } else {
+            /* ReadyQueue가 비어있는 경우 아무것도 실행하지 않는다 */
+            pCurrentThread = NULL;
+            cur_thread->status = THREAD_STATUS_WAIT;
+            queue_push(&sem->waitingQueue, cur_thread);
+        }
+
+        if (new_thread != NULL) {
+            kill(new_pid, SIGCONT); // 새로운 스레드를 실행시킨다
+            kill(cur_pid, SIGSTOP);
+        }
+    }
+
     sem->count--;
 
     return 0;
@@ -86,20 +107,14 @@ int thread_sem_post(int semid) {
     Thread *wait_thread;
     Semaphore *sem;
 
-    if (pSemaphoreTblEnt[semid].bUsed == 0) {
-        perror("thread_sem_post() : That semid is not exist!");
-        return -1;
-    }
-
     sem = pSemaphoreTblEnt[semid].pSemaphore;
     sem->count++;
 
-    if (sem->count == 1 && sem->waitingQueue.pHead != NULL) {
+    if (sem->waitingQueue.queueCount != 0) {
         wait_thread = sem->waitingQueue.pHead;
         queue_pop(&sem->waitingQueue);
-        wait_thread->status = THREAD_STATUS_READY;
-
         queue_push(&ReadyQueue, wait_thread);
+        wait_thread->status = THREAD_STATUS_READY;
     }
 }
 
