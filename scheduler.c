@@ -61,9 +61,13 @@ void scheduler(int signo, siginfo_t *info, void *context) {
     } else if (pCurrentThread != NULL) {
         /* ReadyQueue가 비어있지 않고 현재 실행중인 스레드가 있는 경우 */
 
-        /* 현재 실행중인 스레드를 빨리 종료시키기 위해 __ContextSwitch부터 호출
-         */
-        // __ContextSwitch(pCurrentThread->pid, ReadyQueue.pHead->pid);
+        // 만약 새로실행되는 스레드가 thread_sem_wait()이나 thread_sem_post()를
+        // 호출하면 ReadyQueue나 pCurrentThread에 접근하기때문에 문제가 발생할수
+        // 있다. 따라서 ReadyQueue나 pCurrentThread에 대한 모든 작업을 완료한
+        // 뒤에 새로운 스레드에게 SOGCONT를 보내야 한다.
+        // -> 즉 __ContextSwitch()를 호출하지 않고 각 스레드에 SIGSTOP과
+        // SIGCONT를 따로 보내줘야 한다는 것이다.
+
         kill(pCurrentThread->pid, SIGSTOP);
         sync_time_delay();
 
