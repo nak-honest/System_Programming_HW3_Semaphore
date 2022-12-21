@@ -1,4 +1,4 @@
-TARGET=hw2
+TARGET=hw3
 OBJ=queue.o scheduler.o thread.o semaphore.o testcase.o
 CC=gcc
 CFLAGS=-c
