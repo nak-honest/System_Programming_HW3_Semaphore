@@ -77,34 +77,34 @@ void* Tc2ThreadProc(void* param){
 void TestCase2(void){
     int tid[6];
     int i = 0;
-    int count = 0;
+    int count1, count2, count3, count4, count5, count6;
 
     semid_binary = thread_sem_open(SEM1_NAME, 1);
     semid_counting = thread_sem_open(SEM2_NAME, 3);
 
     thread_sem_wait(semid_binary);
-    count = 4;
-    thread_create(&tid[0], NULL, Tc2ThreadProc, &count);
+    count1 = 4;
+    thread_create(&tid[0], NULL, Tc2ThreadProc, &count1);
 
     thread_sem_wait(semid_binary);
-    count = 7;
-    thread_create(&tid[1], NULL, Tc2ThreadProc, &count);
+    count2 = 7;
+    thread_create(&tid[1], NULL, Tc2ThreadProc, &count2);
 
     thread_sem_wait(semid_binary);
-    count = 3;
-    thread_create(&tid[2], NULL, Tc2ThreadProc, &count);
+    count3 = 3;
+    thread_create(&tid[2], NULL, Tc2ThreadProc, &count3);
 
     thread_sem_wait(semid_binary);
-    count = 4;
-    thread_create(&tid[3], NULL, Tc2ThreadProc, &count);
+    count4 = 4;
+    thread_create(&tid[3], NULL, Tc2ThreadProc, &count4);
 
     thread_sem_wait(semid_binary);
-    count = 4;
-    thread_create(&tid[4], NULL, Tc2ThreadProc, &count);
+    count5 = 4;
+    thread_create(&tid[4], NULL, Tc2ThreadProc, &count5);
 
     thread_sem_wait(semid_binary);
-    count = 5;
-    thread_create(&tid[5], NULL, Tc2ThreadProc, &count);
+    count6 = 5;
+    thread_create(&tid[5], NULL, Tc2ThreadProc, &count6);
 
     for(i = 0;i < 6;i++)
     {
